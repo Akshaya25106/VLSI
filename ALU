@@ -1,0 +1,61 @@
+module alu(
+    input [3:0] a,               
+    input [3:0] b,               
+    input [2:0] opcode,          
+    output [3:0] result,         
+    output carry_out);
+
+    wire [3:0] add_result;
+    wire [3:0] sub_result;
+    wire add_carry;
+    wire [3:0] and_result;
+    wire [3:0] or_result;
+    wire [3:0] not_result;
+
+    
+    assign {add_carry, add_result} =a+b; 
+    assign sub_result =a-b;              
+    assign and_result =a&b;              
+    assign or_result =a|b;               
+    assign not_result =~a;                 
+
+    
+    assign result = (opcode==3'b000) ? add_result :
+                    (opcode==3'b001) ? sub_result :
+                    (opcode==3'b010) ? and_result :
+                    (opcode==3'b011) ? or_result :
+                    (opcode==3'b100) ? not_result :
+                    4'b0000; 
+   
+    assign carry_out = (opcode==3'b000) ? add_carry:1'b0;
+
+endmodule
+ // Testbench
+ 
+module tb_alu;
+    reg [3:0] a, b;         
+    reg [2:0] opcode;       
+    wire [3:0] result;     
+    wire carry_out;         
+
+    alu dut (.a(a),.b(b),.opcode(opcode),.result(result),.carry_out(carry_out));
+
+    initial begin
+        a = 4'b0011; b = 4'b0101; opcode = 3'b000; #10;
+        $display("Addition: A=%b, B=%b, Result=%b, Carry=%b", a, b, result, carry_out);
+
+       a = 4'b1000; b = 4'b0011; opcode = 3'b001; #10;
+        $display("Subtraction: A=%b, B=%b, Result=%b", a, b, result);
+
+       a = 4'b1100; b = 4'b1010; opcode = 3'b010; #10;
+        $display("AND: A=%b, B=%b, Result=%b", a, b, result);
+
+         a = 4'b1100; b = 4'b1010; opcode = 3'b011; #10;
+        $display("OR: A=%b, B=%b, Result=%b", a, b, result);
+
+        a = 4'b1100; opcode = 3'b100; #10;
+        $display("NOT: A=%b, Result=%b", a, result);
+
+        $finish; 
+    end
+endmodule
